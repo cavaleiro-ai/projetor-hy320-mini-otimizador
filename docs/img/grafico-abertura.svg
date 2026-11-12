@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 430" width="760" height="430" role="img" aria-labelledby="t d">
+<title id="t">Tempo para abrir cada app, antes e depois da otimização</title>
+<desc id="d">Configurações: 486 ms antes, 449 ms depois; Gerenciador de arquivos: 431 ms antes, 409 ms depois; Galeria: 489 ms antes, 475 ms depois; Música: 505 ms antes, 495 ms depois; Tela inicial original: 789 ms antes, 773 ms depois.</desc>
+<style>
+  .bg{fill:#fcfcfb;stroke:rgba(11,11,11,.10)}
+  text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+  .t1{fill:#0b0b0b}.t2{fill:#52514e}.tm{fill:#898781}
+  .grid{stroke:#e1e0d9;stroke-width:1}.base{stroke:#c3c2b7;stroke-width:1}
+  .s1{fill:#2a78d6}.s2{fill:#eb6834}
+  @media (prefers-color-scheme: dark){
+    .bg{fill:#1a1a19;stroke:rgba(255,255,255,.10)}
+    .t1{fill:#f0efec}.t2{fill:#c3c2b7}
+    .grid{stroke:#2c2c2a}.base{stroke:#383835}
+    .s1{fill:#3987e5}.s2{fill:#d95926}
+  }
+</style>
+<rect class="bg" x=".5" y=".5" width="759" height="429" rx="10"/>
+<text class="t1" x="24" y="34" font-size="16" font-weight="600">Tempo para abrir cada app</text>
+<text class="t2" x="24" y="54" font-size="12.5">Milissegundos, mediana de 5 aberturas a frio. Menor é melhor.</text>
+<rect class="s1" x="24" y="68" width="10" height="10" rx="2"/><text class="t2" x="40" y="77" font-size="12.5">Antes (como vem de fábrica)</text>
+<rect class="s2" x="222" y="68" width="10" height="10" rx="2"/><text class="t2" x="238" y="77" font-size="12.5">Depois (compilado para código nativo)</text>
+<line class="base" x1="196.0" y1="96" x2="196.0" y2="386"/><text class="tm" x="196.0" y="404" font-size="11.5" text-anchor="middle">0</text>
+<line class="grid" x1="299.5" y1="96" x2="299.5" y2="386"/><text class="tm" x="299.5" y="404" font-size="11.5" text-anchor="middle">200</text>
+<line class="grid" x1="403.0" y1="96" x2="403.0" y2="386"/><text class="tm" x="403.0" y="404" font-size="11.5" text-anchor="middle">400</text>
+<line class="grid" x1="506.5" y1="96" x2="506.5" y2="386"/><text class="tm" x="506.5" y="404" font-size="11.5" text-anchor="middle">600</text>
+<line class="grid" x1="610.0" y1="96" x2="610.0" y2="386"/><text class="tm" x="610.0" y="404" font-size="11.5" text-anchor="middle">800</text>
+<text class="t1" x="184" y="129" font-size="13" text-anchor="end">Configurações</text>
+<path class="s1" d="M196 110H443.5a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4H196z"/><text class="t2" x="453.5" y="121" font-size="12">486</text>
+<path class="s2" d="M196 126H424.4a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4H196z"/><text class="t1" x="434.4" y="137" font-size="12" font-weight="600">449</text>
+<text class="t2" x="736" y="129" font-size="12.5" text-anchor="end">8% mais rápido</text>
+<text class="t1" x="184" y="187" font-size="13" text-anchor="end">Gerenciador de arquivos</text>
+<path class="s1" d="M196 168H415.0a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4H196z"/><text class="t2" x="425.0" y="179" font-size="12">431</text>
+<path class="s2" d="M196 184H403.7a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4H196z"/><text class="t1" x="413.7" y="195" font-size="12" font-weight="600">409</text>
+<text class="t2" x="736" y="187" font-size="12.5" text-anchor="end">5% mais rápido</text>
+<text class="t1" x="184" y="245" font-size="13" text-anchor="end">Galeria</text>
+<path class="s1" d="M196 226H445.1a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4H196z"/><text class="t2" x="455.1" y="237" font-size="12">489</text>
+<path class="s2" d="M196 242H437.8a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4H196z"/><text class="t1" x="447.8" y="253" font-size="12" font-weight="600">475</text>
+<text class="t2" x="736" y="245" font-size="12.5" text-anchor="end">3% mais rápido</text>
+<text class="t1" x="184" y="303" font-size="13" text-anchor="end">Música</text>
+<path class="s1" d="M196 284H453.3a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4H196z"/><text class="t2" x="463.3" y="295" font-size="12">505</text>
+<path class="s2" d="M196 300H448.2a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4H196z"/><text class="t1" x="458.2" y="311" font-size="12" font-weight="600">495</text>
+<text class="t2" x="736" y="303" font-size="12.5" text-anchor="end">2% mais rápido</text>
+<text class="t1" x="184" y="361" font-size="13" text-anchor="end">Tela inicial original</text>
+<path class="s1" d="M196 342H600.3a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4H196z"/><text class="t2" x="610.3" y="353" font-size="12">789</text>
+<path class="s2" d="M196 358H592.0a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4H196z"/><text class="t1" x="602.0" y="369" font-size="12" font-weight="600">773</text>
+<text class="t2" x="736" y="361" font-size="12.5" text-anchor="end">2% mais rápido</text>
+</svg>

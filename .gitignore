@@ -1,0 +1,9 @@
+# Backup do estado original do projetor: contem identificadores do aparelho e nomes de rede.
+backup/
+
+# Instaladores de apps de terceiros (Netflix, Disney+): sao proprietarios e nao podem ser redistribuidos.
+apks/
+
+# Indice local de ferramentas do editor.
+.genesys/
+.claude/settings.local.json
