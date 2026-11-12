@@ -94,6 +94,8 @@ Prime Video e Paramount+ abriram até a tela de login com o DNS privado ativo; a
 | Tela inicial | 42 MB (original) | 87 MB (Projectivy) | o Projectivy usa mais memória |
 | Animações | 1.0x | 0.5x | |
 | Log verboso de Wi-Fi | ligado | desligado | gravava a cada 3 s |
+| Endereços de anúncio bloqueados (de 101) | 72 com AdGuard DNS | 91 com Control D + HaGeZi Pro++ | `ferramentas/testar-bloqueio.sh` no aparelho, 2026-11-12; 44 de 44 endereços necessários funcionando nos dois |
+| AdBlock Tester no TV Bro | | 97 de 100 | DNS no nível forte mais o bloqueador do navegador |
 
 O dono do aparelho relatou uma melhora de velocidade percebida de 235% no uso. Trate esse número como relato, não como medição: o cronômetro da abertura de apps mostra um ganho bem menor, porque não captura transições (metade do tempo), memória livre nem a ausência dos serviços do fabricante. Ao falar de resultados com outra pessoa, separe sempre o que foi medido do que foi percebido.
 
@@ -117,6 +119,8 @@ Conclusão: sem evidência de degradação proposital. O código dos apps do fab
 ## Particularidades deste firmware
 
 - DNS privado (`dns.adguard-dns.com`) valida nesta rede e ficou estável em 3 minutos de consultas. De 32 endereços de anúncio e rastreamento testados, 23 foram bloqueados (9/9 redes de anúncio de apps, 6/7 anúncios Google, 5/8 anúncios em sites, 3/8 rastreadores); passaram, por exemplo, `googlesyndication.com` (sem subdomínio), `appsflyer.com`, `app.adjust.com` e `graph.facebook.com`. YouTube, Max e Netflix seguem liberados. Valores originais de `private_dns_mode`, `private_dns_specifier` e `ntp_server`: ausentes (`null`).
+- Bloqueio em camadas (2026-11-12): com `x-hagezi-proplus.freedns.controld.com` o DNS privado validou (`76.76.2.11`) e YouTube, Prime Video, HBO Max, Paramount+ e Netflix abriram normalmente. O que ainda passa: `imasdk.googleapis.com`, `graph.facebook.com`, `connect.facebook.net`, `appsflyer.com`, `analytics.twitter.com`, `monetag.com`, `ngfts.lge.com`, `adups.com`. Logo após a troca a contagem foi 84, depois 88, 90 e 91: o cache de DNS do Android guarda as respostas do servidor anterior por alguns minutos. A reprodução de vídeo com conta logada não foi testada com o nível forte.
+- Navegadores: a Play Store recusa o Brave (`com.brave.browser`) e instala o TV Bro 2.1.6 (`com.phlox.tvwebbrowser`, `minSdk=29`). O Chrome de fábrica é a versão 75 e o WebView é `com.android.webview` 83. O TV Bro abre sem tela de boas-vindas e com o bloqueador ligado ("ads ON").
 - Durante reprodução no YouTube: app 40% de CPU, `surfaceflinger` 33%, `sugov` 24%, decodificador 13%. Sem pressão de memória e sem varreduras de Wi-Fi em segundo plano.
 - `svc bluetooth disable` falha e o shell não tem `BLUETOOTH_ADMIN`; use `settings put global bluetooth_on 0` e reinicie.
 - `adb_enabled=1` persiste: a depuração volta sozinha após reiniciar, na porta 5555.

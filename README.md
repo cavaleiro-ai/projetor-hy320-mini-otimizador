@@ -89,7 +89,7 @@ Esse número é a percepção de quem usa o aparelho todos os dias, não a leitu
 | Memória dos serviços do fabricante sempre ativos | 44 MB | 0 (nenhum processo) |
 | Memória do Bluetooth ligado sem uso | 25 MB | 0 |
 | Log de depuração do Wi‑Fi | gravando a cada 3 s | desligado |
-| Domínios de anúncio e rastreamento | resolvem normalmente | bloqueados no sistema inteiro (opcional) |
+| Endereços de anúncio e rastreamento bloqueados (de 101 testados) | 0 | 91 (opcional) |
 
 O aparelho tem só 954 MB de RAM, então cada dezena de megabytes conta. Os valores de memória são por processo; o total usado pelo sistema não entra na tabela porque depende de quais apps estão abertos no momento da medição.
 
@@ -133,9 +133,15 @@ Animações em metade do tempo, Bluetooth iniciando desligado e a nova tela inic
 
 ### Anúncios bloqueados
 
-Com a opção de bloqueio ligada, os endereços de redes de anúncio e rastreamento deixam de existir para o projetor, e o conteúdo continua funcionando.
+Com a opção de bloqueio ligada, os endereços de redes de anúncio e rastreamento deixam de existir para o projetor, e o conteúdo continua funcionando. O teste abaixo tenta 101 endereços conhecidos de anúncio: o serviço usado na primeira versão bloqueava 72, o nível forte de agora bloqueia 91, sem quebrar nenhum dos 44 endereços de que os apps precisam.
 
-![Teste do bloqueio de anúncios por DNS](docs/img/terminal-anuncios.png)
+![Teste do bloqueio de anúncios no projetor, nível padrão e nível forte](docs/img/terminal-anuncios.png)
+
+Para as páginas da internet há uma segunda camada: o navegador TV Bro, com bloqueador próprio. Com as duas ligadas, a página AdBlock Tester deu 97 de 100 pontos no projetor.
+
+![AdBlock Tester aberto no TV Bro: 97 pontos de 100](docs/img/bloqueio-navegador.png)
+
+Os anúncios do app do YouTube e os intervalos dos planos de streaming com anúncios continuam. O motivo e as alternativas estão em [Bloqueio de anúncios](#bloqueio-de-anúncios).
 
 ### Apps de streaming funcionando
 
@@ -185,7 +191,8 @@ Estas têm uma contrapartida, por isso são opcionais. `-Completo` liga as quatr
 
 | Opção | O que faz | Contrapartida |
 |---|---|---|
-| `-BloquearAnuncios` | Bloqueia domínios de anúncio e rastreamento no sistema inteiro, pelo DNS privado do Android (AdGuard DNS) | Não remove anúncios dentro do YouTube. As consultas de DNS do projetor passam a ir para o AdGuard. Veja [Bloqueio de anúncios](#bloqueio-de-anúncios) |
+| `-BloquearAnuncios` | Bloqueia endereços de anúncio e rastreamento no sistema inteiro, pelo DNS privado do Android | Não remove anúncios dentro do YouTube. As consultas de DNS do projetor passam a ir para o serviço de bloqueio. Veja [Bloqueio de anúncios](#bloqueio-de-anúncios) |
+| `-NivelBloqueio forte`, `maximo` ou `padrao` | Escolhe a força do bloqueio. Sem esta opção vale `forte` | `maximo` bloqueia também o "Entrar com Facebook" e pode quebrar um ou outro site; `padrao` bloqueia menos |
 | `-DesativarFabricante` | Desativa a loja de apps do fabricante e os atualizadores automáticos | O projetor deixa de receber atualizações do fabricante. A Play Store continua funcionando |
 | `-DesligarBluetooth` | O Bluetooth passa a iniciar desligado | Para usar, ligue nas Configurações. O Android lembra o último estado: se reiniciar com ele ligado, volta ligado |
 | `-InstalarProjectivy` | Instala o [Projectivy Launcher](https://github.com/spocky/miproja1) como tela inicial | Mais organizado, porém usa mais memória que a tela original (87 MB contra 42 MB) |
@@ -200,7 +207,8 @@ Projetor confirmado: HY320mini (sun50iw12p1) em 192.168.0.15:5555
 Backup do estado original salvo em .\backup
 Animacoes em 0.5x e log verboso de Wi-Fi desligado
 Bluetooth ficara desligado a partir do proximo reinicio
-Bloqueio de anuncios ativo (dns.adguard-dns.com). Teste: PING doubleclick.net (127.0.0.1) 56(84) bytes of data.
+Bloqueio de anuncios ativo (x-hagezi-proplus.freedns.controld.com). Teste: PING doubleclick.net (127.0.0.1) 56(84) bytes of data.
+Para contar quantos enderecos de anuncio ele bloqueia: ferramentas\testar-bloqueio.sh
 Desativado: com.softwinner.dragonbox
 Desativado: com.softwinner.agingdragonbox
 Desativado: com.softwinner.dragonatt
@@ -236,15 +244,30 @@ Reativa todos os pacotes desativados, volta as animações, o log de Wi‑Fi, o 
 
 ## Bloqueio de anúncios
 
-A opção `-BloquearAnuncios` não instala nenhum app. Ela liga o **DNS privado** do Android (DNS criptografado, por TLS) apontando para o [AdGuard DNS](https://adguard-dns.io/), que recusa endereços de redes de anúncio e rastreamento. As listas de bloqueio ficam no servidor e são atualizadas por ele; no projetor o custo de memória é zero.
+Nenhum bloqueador sozinho bloqueia tudo. O que este repositório faz é somar duas camadas, e deixar claro o que fica de fora. A explicação completa, com a comparação entre os métodos e como o navegador Brave funciona, está em [docs/bloqueio-de-anuncios.md](docs/bloqueio-de-anuncios.md).
 
-Em um teste com 32 endereços conhecidos de anúncio e rastreamento, 23 foram bloqueados: todas as 9 redes de anúncio de apps testadas (Unity Ads, AppLovin, Vungle, AdMob e outras), 6 de 7 endereços de anúncio do Google (`doubleclick.net`, `googleadservices.com`, `pagead2.googlesyndication.com`...), 5 de 8 de anúncios em sites e 3 de 8 rastreadores. YouTube, Netflix, Max e sites comuns continuaram resolvendo normalmente.
+**Camada 1: o sistema inteiro.** A opção `-BloquearAnuncios` não instala nenhum app. Ela liga o **DNS privado** do Android (DNS criptografado, por TLS) apontando para um serviço que recusa endereços de redes de anúncio e rastreamento. As listas de bloqueio ficam no servidor e são atualizadas por ele; no projetor o custo de memória é zero. São três níveis, escolhidos com `-NivelBloqueio`:
+
+| Nível | Serviço | Bloqueados no teste (de 101) |
+|---|---|---|
+| `forte` (padrão) | [Control D](https://controld.com/free-dns) com a lista [HaGeZi Pro++](https://github.com/hagezi/dns-blocklists) | 91 no projetor |
+| `maximo` | Control D com a lista HaGeZi Ultimate | um pouco mais que o `forte` (95 contra 93 na comparação feita pelo PC); bloqueia também o "Entrar com Facebook" |
+| `padrao` | [AdGuard DNS](https://adguard-dns.io/) | 72 no projetor |
+
+No nível `forte`, o teste no projetor bloqueou os 18 endereços de anúncios dentro de apps (Unity Ads, AppLovin, Vungle e outros), os 21 de anúncios em sites, 12 de 13 do Google, 9 de 11 de pop-ups, 19 de 24 rastreadores e 12 de 14 de TVs e fabricantes. Os 44 endereços de que os apps precisam continuaram funcionando, e YouTube, Netflix, Prime Video, HBO Max e Paramount+ abriram normalmente. Para repetir a contagem no seu aparelho: [ferramentas/testar-bloqueio.sh](ferramentas/testar-bloqueio.sh).
+
+**Camada 2: as páginas da internet.** O Brave bloqueia mais que um DNS porque trabalha dentro do navegador, onde enxerga o endereço completo de cada pedido e a página montada. A Play Store do projetor recusa o Brave, mas aceita o [TV Bro](https://github.com/truefedex/tv-bro), um navegador de código aberto feito para controle remoto, com bloqueador por lista de filtros já ligado. Instale pela Play Store do projetor (procure "TV Bro") ou peça ao Claude Code. Ele não roda em segundo plano.
+
+**O que fica de fora:**
+
+- **Anúncios do app do YouTube.** Eles vêm dos mesmos servidores dos vídeos, e nenhum bloqueio de rede consegue separá-los. Só um app alternativo de YouTube resolve, e ele não está na Play Store; veja [o que pesar antes](docs/bloqueio-de-anuncios.md#youtube).
+- **Planos de streaming com anúncios.** O intervalo comercial é parte do próprio vídeo.
 
 O que saber antes de ligar:
 
-- **Não remove os anúncios do YouTube.** Eles vêm dos mesmos servidores dos vídeos, e bloqueio por DNS não consegue separá-los. O mesmo vale para qualquer app que entrega anúncio e conteúdo pelo mesmo endereço.
-- **Privacidade.** As consultas de DNS do projetor passam a ir para o AdGuard em vez da sua operadora.
-- **Teste automático.** O script confere se a conexão com o DNS validou. Se a rede bloquear a porta 853, ele desfaz a mudança sozinho e avisa.
+- **Privacidade.** As consultas de DNS do projetor passam a ir para o serviço escolhido (Control D ou AdGuard) em vez da sua operadora.
+- **Se um app parar de funcionar** com o nível `forte`, rode o script de novo com `-BloquearAnuncios -NivelBloqueio padrao -PularCompilacao`.
+- **Teste automático.** O script confere se a conexão com o DNS validou. Se o nível escolhido não validar, ele tenta o AdGuard DNS; se a rede bloquear a porta 853, desfaz a mudança sozinho e avisa.
 - **Relógio.** O DNS privado só funciona com a data certa. Para o caso de o relógio zerar por falta de energia, o script também aponta o servidor de hora por endereço IP, que não depende de DNS. Esse cenário (projetor fora da tomada por muito tempo) não foi testado na prática.
 - **Se o projetor ficar sem internet**, rode o `restaurar-hy320.ps1`: ele funciona pela rede local, sem depender de DNS.
 
@@ -321,6 +344,7 @@ A verificação cobriu o comportamento do sistema. O código dos apps do fabrica
 - **Só Windows.** Os scripts são PowerShell. Em Linux ou macOS, os comandos `adb` de dentro deles funcionam igual, um a um.
 - **Sem root.** Uma thread do kernel (`sugov`, o regulador de frequência da CPU) usa de 20% a 24% de um núcleo, inclusive durante a reprodução de vídeo, porque troca a frequência cerca de 50 vezes por segundo. É o maior desperdício que sobrou; os arquivos que controlam isso só aceitam escrita de root, então ficou como está.
 - **Não aumenta a capacidade do hardware.** São 954 MB de RAM e quatro núcleos de 1,3 GHz; apps pesados continuam pesados.
+- **O bloqueio de anúncios não é total.** No teste, 91 de 101 endereços de anúncio foram bloqueados, e os anúncios do app do YouTube e dos planos de streaming com anúncios continuam aparecendo. Nenhum bloqueador de rede resolve esses dois casos.
 - **A melhora de 235% é um relato de uso**, de um aparelho e uma pessoa. No cronômetro, a abertura de apps melhorou de 2% a 8%; o seu resultado pode ser diferente.
 
 ## Dá para instalar outro sistema?
@@ -353,6 +377,8 @@ Abrindo esta pasta no Claude Code, as skills e o [CLAUDE.md](CLAUDE.md) são car
 | [CLAUDE.md](CLAUDE.md) | Instruções que o Claude Code lê ao abrir a pasta |
 | [.claude/skills/](.claude/skills/) | Skills para o Claude Code: o guia passo a passo e o conhecimento técnico |
 | [ferramentas/medir-abertura.sh](ferramentas/medir-abertura.sh) | Mede o tempo de abertura dos apps antes e depois da compilação |
+| [ferramentas/testar-bloqueio.sh](ferramentas/testar-bloqueio.sh) | Conta quantos endereços de anúncio o projetor está bloqueando |
+| [docs/bloqueio-de-anuncios.md](docs/bloqueio-de-anuncios.md) | Como o Brave bloqueia, quais métodos existem e a comparação dos serviços de DNS |
 | [docs/](docs/) | Imagens e dados brutos das medições |
 
 ## Aviso

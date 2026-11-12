@@ -143,7 +143,9 @@ adb -s $ALVO shell "input keyevent KEYCODE_HOME; sleep 5; dumpsys activity activ
 
 Deixe a tela original instalada e ativa como reserva. Meça a memória das duas e conte o resultado como ele é: no HY320 Mini o Projectivy usou cerca de 87 MB contra 42 MB da original. É mais organizado, não mais leve.
 
-**f) Bloquear anúncios (se o usuário pedir).** Em aparelho de 1 GB, não instale app bloqueador: ele fica rodando como VPN e consome a memória que se acabou de liberar. Use o DNS privado do Android (DNS sobre TLS, Android 9+) com um servidor que já aplica as listas de bloqueio, como `dns.adguard-dns.com`. Custo de memória zero e vale para o sistema inteiro.
+**f) Bloquear anúncios (se o usuário pedir).** Em aparelho de 1 GB, não instale app bloqueador: ele fica rodando como VPN e consome a memória que se acabou de liberar. Use o DNS privado do Android (DNS sobre TLS, Android 9+) com um servidor que já aplica as listas de bloqueio. Custo de memória zero e vale para o sistema inteiro.
+
+A força do bloqueio depende da lista do servidor, e a diferença é grande: no HY320 Mini, com os mesmos 101 endereços de anúncio, `dns.adguard-dns.com` bloqueou 72 e `x-hagezi-proplus.freedns.controld.com` (Control D com a lista HaGeZi Pro++) bloqueou 91, os dois sem quebrar nenhum endereço necessário. Escolha pelo que mede, não pela fama: o servidor precisa ter ponto de presença perto do usuário (os que respondem em 200 ms atrasam cada endereço novo) e não pode quebrar os apps de streaming. A comparação completa e os níveis `forte`, `maximo` e `padrao` do script estão em `docs/bloqueio-de-anuncios.md`. Os comandos abaixo usam o AdGuard como exemplo; troque o nome pelo servidor escolhido.
 
 ```bash
 adb -s $ALVO shell "toybox nc -w 4 dns.adguard-dns.com 853 </dev/null && echo aberta"   # a rede deixa passar?
@@ -159,7 +161,11 @@ Três cuidados, todos aprendidos na prática:
 - **Confirme e esteja pronto para reverter.** Verifique `dumpsys connectivity | grep ValidatedPrivateDnsAddresses` (lista não vazia), teste um domínio de anúncio (`ping -c1 doubleclick.net` deve resolver para `127.0.0.1` ou `0.0.0.0`) e um normal. Se não validar, apague as duas chaves (`settings delete global private_dns_mode` e `private_dns_specifier`) na hora. O ADB continua funcionando por IP mesmo com o DNS quebrado. Depois acompanhe por alguns minutos com domínios diferentes.
 - **Relógio.** O DNS privado valida certificado, então exige data correta; e o servidor de hora padrão é um nome, que precisa de DNS. Se o relógio zerar por falta de energia, isso vira um impasse. Apontar `ntp_server` para um IP (ex.: `216.239.35.0`, time1.google.com) evita depender de DNS para acertar a hora.
 
-Diga ao usuário os limites: bloqueio por DNS não remove anúncios do YouTube (vêm dos mesmos servidores dos vídeos), e as consultas de DNS passam a ir para o provedor escolhido.
+- **Meça antes e depois, e espere o cache.** `ferramentas/testar-bloqueio.sh` roda no aparelho e conta quantos endereços de anúncio estão bloqueados e se os endereços necessários continuam resolvendo. Logo depois de trocar de servidor o Android ainda devolve respostas guardadas do anterior; a contagem só estabiliza depois de alguns minutos. Em seguida abra cada app de streaming e confira a tela.
+
+**Páginas da internet.** O DNS só enxerga o nome do servidor; um bloqueador dentro do navegador enxerga o endereço completo e a página, que é como o Brave trabalha. Se o usuário navega no aparelho, instale pela Play Store dele um navegador com bloqueador. No HY320 Mini o Brave é recusado ("dispositivo não compatível") e o TV Bro (`com.phlox.tvwebbrowser`) instala, já com o bloqueador ligado e sem serviço em segundo plano.
+
+Diga ao usuário os limites, sem prometer "bloquear tudo": nenhum bloqueio de rede remove os anúncios do app do YouTube (vêm dos mesmos servidores dos vídeos) nem os intervalos dos planos de streaming com anúncios, e as consultas de DNS passam a ir para o provedor escolhido. App alternativo de YouTube só existe fora da Play Store: explique o que é e deixe a decisão e a instalação com o usuário.
 
 **g) Instalar apps (se o usuário pedir).** Use a Play Store do próprio aparelho: é a fonte oficial e já diz se o app é compatível. Abra a página do app, confira a tela e só então acione o botão.
 

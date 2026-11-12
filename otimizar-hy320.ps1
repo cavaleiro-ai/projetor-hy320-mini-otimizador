@@ -6,9 +6,15 @@
 #   .\otimizar-hy320.ps1 -Ip 192.168.0.15 -Completo    # basico + as quatro opcoes abaixo
 #
 # Opcoes (cada uma tem uma contrapartida, por isso sao opcionais):
-#   -BloquearAnuncios      usa o DNS privado do Android com o AdGuard DNS, que bloqueia dominios
-#                          de anuncio e rastreamento no sistema inteiro, sem instalar app
-#                          (nao remove anuncios dentro do YouTube; as consultas de DNS passam pelo AdGuard)
+#   -BloquearAnuncios      usa o DNS privado do Android com um servico que bloqueia dominios de
+#                          anuncio e rastreamento no sistema inteiro, sem instalar app
+#                          (nao remove anuncios dentro do YouTube; as consultas de DNS passam pelo servico)
+#   -NivelBloqueio <nivel> forca do bloqueio, usado junto com -BloquearAnuncios:
+#                            forte   (padrao) Control D + lista HaGeZi Pro++: 91 de 101 enderecos no projetor de teste
+#                            maximo  Control D + lista HaGeZi Ultimate: um pouco mais que o forte; bloqueia tambem o
+#                                    "Entrar com Facebook" e pode quebrar um ou outro site
+#                            padrao  AdGuard DNS: 72 de 101 no mesmo teste; o mais conservador
+#                          Se o nivel escolhido nao funcionar na rede, o script tenta o AdGuard DNS.
 #   -DesativarFabricante   desativa a loja do fabricante e os atualizadores automaticos
 #                          (o projetor deixa de receber atualizacoes do fabricante)
 #   -DesligarBluetooth     Bluetooth inicia desligado (religue nas Configuracoes quando quiser)
@@ -20,6 +26,7 @@ param(
   [string]$Ip,
   [switch]$Completo,
   [switch]$BloquearAnuncios,
+  [ValidateSet('padrao', 'forte', 'maximo')][string]$NivelBloqueio = 'forte',
   [switch]$DesativarFabricante,
   [switch]$DesligarBluetooth,
   [switch]$InstalarProjectivy,
@@ -60,7 +67,14 @@ $testesDeFabrica = 'com.softwinner.dragonbox', 'com.softwinner.agingdragonbox', 
                    'com.android.printspooler', 'com.android.bips', 'com.android.printservice.recommendation'
 
 # DNS que bloqueia dominios de anuncio e rastreamento (as listas ficam no servidor e se atualizam sozinhas).
-$dnsBloqueador = 'dns.adguard-dns.com'
+# Os tres foram comparados com ferramentas/testar-bloqueio.sh; os numeros estao em docs/bloqueio-de-anuncios.md.
+$dnsPorNivel = @{
+  padrao = 'dns.adguard-dns.com'
+  forte  = 'x-hagezi-proplus.freedns.controld.com'
+  maximo = 'x-hagezi-ultimate.freedns.controld.com'
+}
+$dnsBloqueador = $dnsPorNivel[$NivelBloqueio]
+$dnsReserva = $dnsPorNivel['padrao']
 # Servidor de hora por IP (time1.google.com). O DNS privado exige relogio certo para validar o
 # certificado; se o relogio zerar por falta de energia, a hora precisa ser obtida sem depender de DNS.
 $servidorDeHora = '216.239.35.0'
@@ -130,22 +144,29 @@ if ($BloquearAnuncios) {
   # Se ja esta ativo e validado, nao regrava: no Android 11, gravar a configuracao de DNS privado
   # duas vezes seguidas cancela a validacao em andamento e o sistema nao tenta de novo (fica sem DNS).
   $validou = ($modoAntes -eq 'hostname' -and $servidorAntes -eq $dnsBloqueador -and (DnsPrivadoValidou))
+  $dnsEmUso = $dnsBloqueador
   if (-not $validou) {
-    foreach ($tentativa in 1..2) {
-      # Desliga, grava o servidor e so entao liga: assim ocorre uma unica validacao.
-      Sh 'settings put global private_dns_mode off'
-      Start-Sleep -Seconds 3
-      Sh "settings put global private_dns_specifier $dnsBloqueador"
-      Start-Sleep -Seconds 2
-      Sh 'settings put global private_dns_mode hostname'
-      # Confere se a conexao criptografada com o DNS validou; algumas redes bloqueiam a porta 853.
-      foreach ($n in 1..8) { Start-Sleep -Seconds 2; if (DnsPrivadoValidou) { $validou = $true; break } }
-      if ($validou) { break }
+    # Tenta o nivel pedido e, se ele nao validar nesta rede, o AdGuard DNS.
+    foreach ($servidor in (@($dnsBloqueador, $dnsReserva) | Select-Object -Unique)) {
+      foreach ($tentativa in 1..2) {
+        # Desliga, grava o servidor e so entao liga: assim ocorre uma unica validacao.
+        Sh 'settings put global private_dns_mode off'
+        Start-Sleep -Seconds 3
+        Sh "settings put global private_dns_specifier $servidor"
+        Start-Sleep -Seconds 2
+        Sh 'settings put global private_dns_mode hostname'
+        # Confere se a conexao criptografada com o DNS validou; algumas redes bloqueiam a porta 853.
+        foreach ($n in 1..8) { Start-Sleep -Seconds 2; if (DnsPrivadoValidou) { $validou = $true; break } }
+        if ($validou) { break }
+      }
+      if ($validou) { $dnsEmUso = $servidor; break }
+      Write-Host "O servidor $servidor nao validou nesta rede." -ForegroundColor Yellow
     }
   }
   if ($validou) {
     $teste = ((Sh 'ping -c1 -W2 doubleclick.net 2>&1 | head -1') -join '')
-    Write-Host "Bloqueio de anuncios ativo ($dnsBloqueador). Teste: $teste"
+    Write-Host "Bloqueio de anuncios ativo ($dnsEmUso). Teste: $teste"
+    Write-Host 'Para contar quantos enderecos de anuncio ele bloqueia: ferramentas\testar-bloqueio.sh'
   } else {
     # Sem DNS o projetor fica sem internet: volta ao DNS da rede (padrao do Android).
     Sh 'settings delete global private_dns_mode' | Out-Null

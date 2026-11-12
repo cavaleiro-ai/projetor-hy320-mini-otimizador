@@ -127,7 +127,7 @@ O que a completa faz a mais:
 
 | Mudança | O que você ganha | O que você perde |
 |---|---|---|
-| Bloqueia anúncios pelo DNS | Menos anúncios e rastreamento em sites e apps, sem instalar nada | Não tira os anúncios do YouTube. As consultas de endereços passam pelo serviço AdGuard |
+| Bloqueia anúncios pelo DNS | Menos anúncios e rastreamento em sites e apps, sem instalar nada. No teste, 91 de 101 endereços de anúncio bloqueados | Não tira os anúncios do YouTube. As consultas de endereços passam por um serviço de bloqueio (Control D). Se algum app estranhar, dá para usar um nível mais leve com `-NivelBloqueio padrao` |
 | Desativa a loja e os atualizadores do fabricante | Memória livre e nenhum app instalado sem você pedir | Atualizações do fabricante. A Play Store continua |
 | Bluetooth inicia desligado | Memória livre | Precisa ligar nas Configurações quando for usar |
 | Instala o Projectivy como tela inicial | Tela inicial mais organizada | Ela usa mais memória que a original |

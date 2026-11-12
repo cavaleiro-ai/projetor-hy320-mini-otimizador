@@ -73,7 +73,8 @@ A otimização básica não tem contrapartida e entra sempre. As opções abaixo
 
 | Opção | Em palavras simples | O que ela perde |
 |---|---|---|
-| Bloquear anúncios | Menos propaganda e rastreamento em apps e sites, sem instalar nada | Não tira anúncio do YouTube; as consultas de endereços passam por um serviço chamado AdGuard |
+| Bloquear anúncios | Menos propaganda e rastreamento em apps e sites, sem instalar nada | Não tira anúncio do YouTube; as consultas de endereços passam por um serviço de bloqueio (Control D) |
+| Navegador com bloqueador (TV Bro) | Para quem abre sites no projetor: um navegador feito para controle remoto que esconde os anúncios das páginas | Ocupa espaço como qualquer app; alguns sites recentes podem aparecer desalinhados |
 | Desligar a loja e os atualizadores do fabricante | Libera memória e impede apps instalados sem pedir | O projetor não recebe mais atualizações do fabricante; a Play Store continua |
 | Bluetooth desligado ao ligar | Libera memória | Precisa ligar nas Configurações quando for usar caixa de som ou fone |
 | Tela inicial nova (Projectivy) | Tela mais organizada | Usa mais memória que a original |
@@ -88,6 +89,8 @@ Monte o comando com as opções escolhidas (`-BloquearAnuncios`, `-DesativarFabr
 powershell -NoProfile -ExecutionPolicy Bypass -File .\otimizar-hy320.ps1 -Ip <ip> <opções>
 ```
 
+O bloqueio de anúncios entra no nível `forte`. Só use `-NivelBloqueio maximo` se a pessoa pedir o máximo e aceitar que o "Entrar com Facebook" e um ou outro site podem parar; use `-NivelBloqueio padrao` se algum app deixar de funcionar.
+
 Avise antes: o projetor fica lento enquanto isso roda, e ela não deve desligá-lo. Ao terminar, leia a saída e conte: quantos apps foram preparados, se houve falha, e se o bloqueio de anúncios validou. Se o script disser que o DNS privado não validou, ele já desfez essa parte sozinho; explique que a rede dela não permite e siga.
 
 ## Passo 6: apps de streaming (opcional)
@@ -98,12 +101,15 @@ Siga a seção "Instalar apps" da skill técnica: abra a página do app na loja,
 - **Netflix**: a Play Store recusa. O caminho é a loja do fabricante (aparece como **Appstore** ou **Loja de Aplicativos**), que tem a Netflix original em versão antiga ("7.120_NetFlix"). Essa loja exige aceitar uma política de privacidade que avisa que coleta dados de uso: explique isso e deixe a decisão com a pessoa. Se ela concordar, peça que ela mesma aperte **Concordar** no controle, ou que autorize você a fazê-lo. Depois de instalar, confira a assinatura do app como a skill técnica descreve, antes de ela digitar a senha, e desligue a loja de novo se a pessoa pediu isso no passo 4. Avise que essa versão se usa com o modo mouse do controle.
 - **Disney+**: não funciona neste projetor (exige Android mais novo) e a loja do fabricante não tem. Diga isso com clareza e sugira um aparelho de streaming na entrada HDMI. Não procure o app em outros sites.
 
+- **TV Bro** (se ela quis o navegador com bloqueador): pela Play Store do projetor, pacote `com.phlox.tvwebbrowser`. Ele já abre com o bloqueador ligado; não há nada para configurar.
+- **YouTube sem anúncios**: se ela perguntar, explique que nenhum bloqueio de rede tira os anúncios do app do YouTube, que o app alternativo que faz isso não está na Play Store e que este guia não instala apps de fora dela. A decisão é dela; os detalhes estão em `docs/bloqueio-de-anuncios.md`.
+
 Entrar com a conta em cada app é com a pessoa; não peça nem digite senhas.
 
 ## Passo 7: reiniciar e conferir
 
 1. Peça para ela desligar e ligar o projetor.
-2. Espere ele voltar à rede e confira você mesmo: os itens desligados continuam desligados, o bloqueio de anúncios está ativo (se foi escolhido), o Bluetooth iniciou desligado (se foi escolhido) e a tela inicial é a esperada.
+2. Espere ele voltar à rede e confira você mesmo: os itens desligados continuam desligados, o bloqueio de anúncios está ativo (se foi escolhido; `ferramentas/testar-bloqueio.sh` conta quantos endereços de anúncio estão bloqueados e se os apps continuam alcançando o que precisam), o Bluetooth iniciou desligado (se foi escolhido) e a tela inicial é a esperada.
 3. Se o Projectivy foi instalado, ele mostra uma tela de boas-vindas: peça que ela siga com o controle.
 4. Mostre o antes e depois com os números do aparelho dela, em uma tabela curta: quantos apps estavam compilados para código nativo de fábrica (`status=speed` em `backup\dexopt-original.txt`) e quantos estão agora (`dumpsys package dexopt`), e quais itens ficaram desligados. Pergunte se ela sentiu diferença nos menus. Se quiser um número de cronômetro, `ferramentas/medir-abertura.sh` mede a abertura dos apps; avise que leva 15 minutos e que o ganho nesse teste costuma ser pequeno (2% a 8% no aparelho de referência), porque ele não mede transições nem memória livre.
 
