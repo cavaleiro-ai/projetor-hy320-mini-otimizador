@@ -65,7 +65,7 @@ Interprete o resultado:
 - **Outro aparelho encontrado** (celular, tablet): ignore-o e não toque nele. Diga à pessoa que achou outro aparelho e continue procurando.
 - **Nada encontrado**: o projetor pode estar em outra faixa de rede (computador no cabo, projetor no Wi-Fi). Peça para ela abrir **Configurações > Rede e Internet**, entrar na rede conectada e ler o **endereço IP**. Com os três primeiros números, rode `.\encontrar-projetor.ps1 -Rede 192.168.0` (trocando pelos números dela). Se ainda assim não aparecer, volte ao passo 2 e confira a chave da Depuração USB.
 
-Os scripts só continuam se o aparelho for mesmo um HY320 Mini. Se abortarem dizendo que não é, o projetor é de outra variante: explique isso e use a skill técnica, que cobre a análise de qualquer aparelho, em vez de forçar os scripts.
+Os scripts só continuam se o aparelho for mesmo um HY320 com chip Allwinner H713. Se abortarem dizendo que não é, o projetor é de outro modelo: explique isso e use a skill técnica, que cobre a análise de qualquer aparelho, em vez de forçar os scripts. Se continuarem mas avisarem que o firmware não foi reconhecido, só os ajustes genéricos são aplicados: conte isso à pessoa e use a skill técnica para identificar a loja e os atualizadores daquele firmware.
 
 ## Passo 4: perguntar o que a pessoa quer
 
@@ -118,7 +118,7 @@ Entrar com a conta em cada app é com a pessoa; não peça nem digite senhas.
 | O que aparece | O que fazer |
 |---|---|
 | A busca não encontra o projetor | Conferir a chave da Depuração USB, o Wi-Fi do projetor e a faixa de rede (passo 3) |
-| "ABORTADO: não é o HY320 Mini" | É outro aparelho ou outra variante; não force. Use a skill técnica |
+| "ABORTADO: não é um HY320 com Allwinner H713" | É outro aparelho ou outra variante; não force. Use a skill técnica |
 | Projetor sem internet depois do bloqueio de anúncios | Rodar `.\restaurar-hy320.ps1 -Ip <ip>`; ele funciona pela rede local, sem internet |
 | Um botão do controle parou de funcionar | Rodar o `restaurar-hy320.ps1` e investigar com a skill técnica antes de repetir |
 | O projetor trocou de IP | Rodar a busca de novo |

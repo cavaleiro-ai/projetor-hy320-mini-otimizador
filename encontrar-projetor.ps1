@@ -63,7 +63,7 @@ foreach ($ip in $achados) {
       Write-Host "$ip  ->  $modelo ($hardware)  <== este e o projetor" -ForegroundColor Green
       Write-Host "      Proximo passo: .\otimizar-hy320.ps1 -Ip $ip"
     } else {
-      Write-Host "$ip  ->  $modelo ($hardware)  (outro aparelho; nao e o HY320 Mini)"
+      Write-Host "$ip  ->  $modelo ($hardware)  (outro aparelho; nao e um HY320 com Allwinner H713)"
     }
   } else {
     Write-Host "$ip  ->  porta aberta, mas sem resposta do ADB"

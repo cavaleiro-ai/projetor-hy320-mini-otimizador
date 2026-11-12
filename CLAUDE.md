@@ -5,7 +5,7 @@ Este repositório deixa o projetor **HY320 Mini** (Allwinner H713, Android 11) m
 ## Por onde começar
 
 - A pessoa pediu para configurar, otimizar ou "fazer tudo" no projetor: use a skill `configurar-projetor` (responde a `/configurar-projetor`). Ela conduz o passo a passo inteiro.
-- A pessoa quer analisar, medir ou mexer em algo fora do roteiro, ou o aparelho é outro modelo: use a skill `otimizar-projetor-android` e a referência `.claude/skills/otimizar-projetor-android/references/hy320-mini.md`.
+- A pessoa quer analisar, medir ou mexer em algo fora do roteiro, ou o aparelho é outro modelo: use a skill `otimizar-projetor-android` e as referências `.claude/skills/otimizar-projetor-android/references/hy320-mini.md` (firmware ChipTrip) e `hy320-htc.md` (firmware HTC).
 - A pessoa quer desfazer: `.\restaurar-hy320.ps1 -Ip <ip>`.
 
 ## Regras que valem sempre
