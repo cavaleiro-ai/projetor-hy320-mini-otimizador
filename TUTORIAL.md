@@ -238,6 +238,14 @@ O projetor está mostrando a pergunta "Permitir depuração USB?". Aceite na tel
 **"ABORTADO: ... não é o HY320 Mini"**
 O script encontrou outro aparelho Android (um celular ou tablet, por exemplo) ou uma versão diferente do projetor. Ele para de propósito, para não alterar o aparelho errado. Confira o IP.
 
+Se a mensagem mostra `hardware='sun50iw12p1'` com outro modelo (por exemplo `HY300Pro`), é um projetor com o mesmo chip do HY320 Mini, mas com outro firmware que não foi testado. Se for mesmo o seu projetor e você quiser tentar, rode a otimização **básica** com `-AceitarModelo`:
+
+```powershell
+.\otimizar-hy320.ps1 -Ip 192.168.0.15 -AceitarModelo
+```
+
+Tudo continua reversível pelo passo 9. Pacotes que não existirem nesse firmware são só pulados, com um aviso em amarelo.
+
 **O projetor ficou sem internet depois de ligar o bloqueio de anúncios**
 O bloqueio depende de uma conexão segura com o serviço de DNS, e ela precisa da data certa no projetor. Primeiro confira a data e a hora em **Configurações > Preferências do dispositivo > Data e hora**. Se não resolver, rode o `restaurar-hy320.ps1` (passo 9): ele desliga o bloqueio e funciona mesmo com o projetor sem internet, porque usa só a rede da sua casa.
 
