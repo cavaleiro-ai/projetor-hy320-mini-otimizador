@@ -1,0 +1,3 @@
+# ADB baixado pelo passo 3 do tutorial e APKs temporarios: nao vao para o Git.
+platform-tools/
+*.apk
