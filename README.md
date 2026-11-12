@@ -198,6 +198,7 @@ Estas têm uma contrapartida, por isso são opcionais. `-Completo` liga as quatr
 | `-InstalarProjectivy` | Instala o [Projectivy Launcher](https://github.com/spocky/miproja1) como tela inicial | Mais organizado, porém usa mais memória que a tela original (87 MB contra 42 MB) |
 | `-Desativar pkg1,pkg2` | Desativa outros pacotes que você indicar | Por sua conta |
 | `-PularCompilacao` | Pula a compilação dos apps | Útil só para reaplicar ajustes |
+| `-AceitarModelo` | Aceita outro modelo com o mesmo chip do HY320 Mini (`sun50iw12p1`), como o HY300 Pro | O roteiro foi testado só no HY320 Mini. Prefira o modo básico, sem `-Completo`. Pacotes que não existirem no firmware são pulados com um aviso |
 
 ### Exemplo de saída
 

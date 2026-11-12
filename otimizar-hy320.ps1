@@ -22,6 +22,8 @@
 #                          (mais organizado, mas usa mais memoria que a tela original)
 #   -Desativar pkg1,pkg2   desativa outros pacotes informados
 #   -PularCompilacao       nao recompila os apps (etapa demorada, 10 a 15 minutos)
+#   -AceitarModelo         aceita outro modelo com o mesmo chip (sun50iw12p1), ex.: HY300 Pro.
+#                          O roteiro foi testado so no HY320 Mini; prefira o modo basico.
 param(
   [string]$Ip,
   [switch]$Completo,
@@ -31,7 +33,8 @@ param(
   [switch]$DesligarBluetooth,
   [switch]$InstalarProjectivy,
   [string[]]$Desativar = @(),
-  [switch]$PularCompilacao
+  [switch]$PularCompilacao,
+  [switch]$AceitarModelo
 )
 
 # Permite usar um adb.exe copiado para a pasta dos scripts (o PowerShell nao procura na pasta atual).
@@ -104,9 +107,18 @@ if ($estado -notmatch '\sdevice$') {
 }
 $hardware = (Sh 'getprop ro.hardware') -join ''
 $modelo = (Sh 'getprop ro.product.model') -join ''
-if ($hardware.Trim() -ne 'sun50iw12p1' -or $modelo.Trim() -notlike 'HY320*') {
+if ($hardware.Trim() -ne 'sun50iw12p1') {
   Write-Host "ABORTADO: $alvo nao e o HY320 Mini (hardware='$hardware', modelo='$modelo')." -ForegroundColor Red
   exit 1
+}
+if ($modelo.Trim() -notlike 'HY320*') {
+  if (-not $AceitarModelo) {
+    Write-Host "ABORTADO: $alvo nao e o HY320 Mini (hardware='$hardware', modelo='$modelo')." -ForegroundColor Red
+    Write-Host 'O chip e o mesmo do HY320 Mini. Para continuar mesmo assim, rode de novo com -AceitarModelo'
+    Write-Host '(de preferencia no modo basico, sem -Completo).'
+    exit 1
+  }
+  Write-Host "Aviso: modelo $modelo, nao testado. Continuando por causa do -AceitarModelo." -ForegroundColor Yellow
 }
 Write-Host "Projetor confirmado: $modelo ($hardware) em $alvo"
 
