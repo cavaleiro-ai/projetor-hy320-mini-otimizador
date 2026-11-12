@@ -2,6 +2,8 @@
 
 Scripts, tutorial e skills do Claude Code para deixar o projetor **HY320 Mini** (Allwinner H713, Android 11) mais rápido e mais leve pela rede Wi‑Fi, usando ADB a partir de um PC com Windows.
 
+Funciona em duas variantes de firmware, reconhecidas automaticamente: a do **HY320 Mini** (placa ChipTrip) e a do **HY320** com firmware HTC (`UI_Veng.projector`). Veja [Firmwares reconhecidos](#firmwares-reconhecidos).
+
 Nada é apagado nem regravado: os apps são compilados, os serviços desnecessários do fabricante são **desativados** (não desinstalados) e tudo pode ser desfeito com um comando.
 
 | Tela inicial original | Depois, com o Projectivy (opcional) |
@@ -18,6 +20,7 @@ Nada é apagado nem regravado: os apps são compilados, os serviços desnecessá
 - [Resultado](#resultado)
 - [Como usar sem o Claude Code](#como-usar-sem-o-claude-code)
 - [O que o script faz](#o-que-o-script-faz)
+- [Firmwares reconhecidos](#firmwares-reconhecidos)
 - [Como desfazer](#como-desfazer)
 - [Bloqueio de anúncios](#bloqueio-de-anúncios)
 - [Apps de streaming](#apps-de-streaming)
@@ -172,10 +175,11 @@ Resumo para quem já conhece ADB. O passo a passo completo, com imagens de cada 
 
 | Etapa | O que muda | Por quê |
 |---|---|---|
-| Trava de segurança | Confere se o aparelho é mesmo um HY320 Mini antes de qualquer alteração | Evita mexer em outro Android da rede (celular, tablet) |
-| Backup | Salva ajustes, lista de pacotes e estado de compilação em `backup/` | Permite conferir e restaurar o estado original |
-| Compilação | Compila os apps para código nativo (`speed`) | De fábrica, quase tudo roda interpretado |
-| Pacotes sem uso | Desativa três ferramentas de teste da linha de produção e a pilha de impressão do Android | Não têm uso em um projetor; o serviço de impressão sobe em todo boot |
+| Trava de segurança | Confere se o aparelho é mesmo um HY320 com Allwinner H713 antes de qualquer alteração | Evita mexer em outro Android da rede (celular, tablet) |
+| Firmware | Detecta a variante pela tela inicial de fábrica instalada e escolhe a lista de pacotes certa | Cada fabricante de placa usa nomes de pacote diferentes |
+| Backup | Salva ajustes, lista de pacotes e estado de compilação em `backup/`, e os valores originais que o restaurar usa em `backup/estado-original.txt` | Permite conferir e voltar exatamente ao estado original |
+| Compilação | Compila os apps para código nativo (`speed`). Com menos de 1,5 GB livres usa `speed-profile`, e para abaixo de 500 MB | De fábrica, quase tudo roda interpretado; `speed` em tudo pode encher um armazenamento pequeno |
+| Pacotes sem uso | Desativa as ferramentas de teste da linha de produção e a pilha de impressão do Android | Não têm uso em um projetor; o serviço de impressão sobe em todo boot |
 | Animações | Reduz para 0.5x | A interface responde mais rápido |
 | Log de Wi‑Fi | Desliga o log verboso | Gravava no log a cada 3 segundos |
 
@@ -188,9 +192,10 @@ Estas têm uma contrapartida, por isso são opcionais. `-Completo` liga as quatr
 | `-BloquearAnuncios` | Bloqueia domínios de anúncio e rastreamento no sistema inteiro, pelo DNS privado do Android (AdGuard DNS) | Não remove anúncios dentro do YouTube. As consultas de DNS do projetor passam a ir para o AdGuard. Veja [Bloqueio de anúncios](#bloqueio-de-anúncios) |
 | `-DesativarFabricante` | Desativa a loja de apps do fabricante e os atualizadores automáticos | O projetor deixa de receber atualizações do fabricante. A Play Store continua funcionando |
 | `-DesligarBluetooth` | O Bluetooth passa a iniciar desligado | Para usar, ligue nas Configurações. O Android lembra o último estado: se reiniciar com ele ligado, volta ligado |
-| `-InstalarProjectivy` | Instala o [Projectivy Launcher](https://github.com/spocky/miproja1) como tela inicial | Mais organizado, porém usa mais memória que a tela original (87 MB contra 42 MB) |
+| `-InstalarProjectivy` | Instala o [Projectivy Launcher](https://github.com/spocky/miproja1) como tela inicial, conferindo o SHA-256 publicado pelo GitHub antes de instalar. Se o protetor de tela fizer parte da tela inicial de fábrica, ele é desligado, porque recarregaria a tela antiga na memória | Mais organizado, porém pode usar mais memória que a tela original (87 MB contra 42 MB no HY320 Mini) |
 | `-Desativar pkg1,pkg2` | Desativa outros pacotes que você indicar | Por sua conta |
 | `-PularCompilacao` | Pula a compilação dos apps | Útil só para reaplicar ajustes |
+| `-Simular` | Confere o aparelho, mostra o firmware detectado, os pacotes que seriam desativados e o modo de compilação, sem alterar nada | Nenhuma |
 
 ### Exemplo de saída
 
@@ -229,10 +234,28 @@ A compilação leva pouco mais de 10 minutos e o projetor fica lento enquanto el
 .\restaurar-hy320.ps1 -Ip 192.168.0.15
 ```
 
-Reativa todos os pacotes desativados, volta as animações, o log de Wi‑Fi, o Bluetooth, o DNS e a tela inicial original. Opções extras:
+Reativa todos os pacotes desativados e volta as animações, o log de Wi‑Fi, o Bluetooth, o DNS, o protetor de tela e a tela inicial aos valores que o aparelho tinha, lidos de `backup/estado-original.txt`. Em backups feitos por versões antigas do script, sem esse arquivo, usa os padrões de fábrica e a tela inicial de fábrica que existir no aparelho. Opções extras:
 
 - `-RemoverProjectivy` também desinstala o Projectivy.
 - `-ResetCompilacao` também descarta a compilação nativa dos apps.
+- `-Simular` mostra os comandos que seriam enviados, sem alterar nada.
+
+## Firmwares reconhecidos
+
+Projetores vendidos como "HY320" usam placas de fabricantes diferentes. O chip é o mesmo (Allwinner H713, `ro.hardware=sun50iw12p1`), mas a tela inicial, a loja e os atualizadores mudam de nome. O script detecta a variante pela tela inicial de fábrica instalada:
+
+| Perfil | Firmware testado | Modelo | Testes de fábrica extras | Loja e atualizadores (`-DesativarFabricante`) |
+|---|---|---|---|---|
+| `chiptrip` | `HY320mini_Android11_202506182038` | `HY320mini` | nenhum | `com.android.fungo`, `com.uv.droid.uota`, `com.uv.droid.uotaback`, `com.adups.fota` |
+| `htc` | `UI_Veng.projector.20240716.162721` | `HY320` | `com.hotack.hotackfeaturestest`, `com.htc.hyk_test` | `com.htc.storeos`, `com.htc.htcotaupdate`, `android.rockchip.update.service`, `com.softwinner.update`, `com.mobisystems.office` |
+
+Em firmware desconhecido, o script aplica só os ajustes genéricos e não mexe em loja nem atualizadores. Rode com `-Simular` para ver o que seria feito, e use `-Desativar` para pacotes específicos do seu aparelho. Os dados de cada variante estão em [hy320-mini.md](.claude/skills/otimizar-projetor-android/references/hy320-mini.md) e [hy320-htc.md](.claude/skills/otimizar-projetor-android/references/hy320-htc.md).
+
+No firmware HTC, observe também:
+
+- O Android é 32 bits: ao instalar APKs por conta própria, escolha a variante `armeabi-v7a` ou `universal`.
+- O armazenamento livre de fábrica é pequeno (cerca de 1,3 GB), por isso a compilação muda para `speed-profile`.
+- O YouTube ReVanced/ReX (versão de celular modificada) ficou limitado a 240p nesse aparelho. O YouTube para TV e o [SmartTube](https://github.com/yuliskov/SmartTube) tocam 1080p a 60 fps na mesma rede.
 
 ## Bloqueio de anúncios
 
@@ -317,7 +340,7 @@ A verificação cobriu o comportamento do sistema. O código dos apps do fabrica
 
 ## Limitações
 
-- **Testado em um único firmware**: `HY320mini_Android11_202506182038`, placa ChipTrip. Outras versões vendidas como "HY320" usam placas diferentes; o script aborta se o hardware não for `sun50iw12p1` com modelo `HY320*`, e os nomes de pacotes podem não coincidir.
+- **Testado em dois firmwares**: `HY320mini_Android11_202506182038` (placa ChipTrip) e `UI_Veng.projector.20240716.162721` (HTC). Outras versões vendidas como "HY320" podem usar placas diferentes; o script aborta se o hardware não for `sun50iw12p1` com modelo `HY320*`, e em firmware desconhecido aplica só os ajustes genéricos.
 - **Só Windows.** Os scripts são PowerShell. Em Linux ou macOS, os comandos `adb` de dentro deles funcionam igual, um a um.
 - **Sem root.** Uma thread do kernel (`sugov`, o regulador de frequência da CPU) usa de 20% a 24% de um núcleo, inclusive durante a reprodução de vídeo, porque troca a frequência cerca de 50 vezes por segundo. É o maior desperdício que sobrou; os arquivos que controlam isso só aceitam escrita de root, então ficou como está.
 - **Não aumenta a capacidade do hardware.** São 954 MB de RAM e quatro núcleos de 1,3 GHz; apps pesados continuam pesados.
@@ -338,7 +361,7 @@ O repositório inclui duas skills para o Claude Code (e agentes compatíveis):
 | [configurar-projetor](.claude/skills/configurar-projetor/SKILL.md) | Guia passo a passo para leigos: conduz a pessoa do zero até o HY320 Mini otimizado, fazendo no computador tudo o que der e pedindo só o que é físico. É a que responde a `/configurar-projetor` |
 | [otimizar-projetor-android](.claude/skills/otimizar-projetor-android/SKILL.md) | Conhecimento técnico: como analisar e otimizar qualquer projetor ou TV box Android com segurança, com as armadilhas já encontradas |
 
-Os dados deste aparelho, pacote por pacote, estão em [references/hy320-mini.md](.claude/skills/otimizar-projetor-android/references/hy320-mini.md).
+Os dados de cada variante, pacote por pacote, estão em [references/hy320-mini.md](.claude/skills/otimizar-projetor-android/references/hy320-mini.md) (ChipTrip) e [references/hy320-htc.md](.claude/skills/otimizar-projetor-android/references/hy320-htc.md) (HTC).
 
 Abrindo esta pasta no Claude Code, as skills e o [CLAUDE.md](CLAUDE.md) são carregados automaticamente. Para usar as skills em outros projetos, copie as pastas de `.claude/skills/` para `~/.claude/skills/`; a `configurar-projetor` depende dos scripts deste repositório.
 
