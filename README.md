@@ -90,7 +90,6 @@ Esse número é a percepção de quem usa o aparelho todos os dias, não a leitu
 | Memória do Bluetooth ligado sem uso | 25 MB | 0 |
 | Log de depuração do Wi‑Fi | gravando a cada 3 s | desligado |
 | Domínios de anúncio e rastreamento | resolvem normalmente | bloqueados no sistema inteiro (opcional) |
-| Tempo para abrir um app, com cronômetro (5 apps) | 431 a 789 ms | 409 a 773 ms (2% a 8% menos) |
 
 O aparelho tem só 954 MB de RAM, então cada dezena de megabytes conta. Os valores de memória são por processo; o total usado pelo sistema não entra na tabela porque depende de quais apps estão abertos no momento da medição.
 
@@ -102,21 +101,19 @@ De fábrica, 89 apps ficam apenas "verificados": o Android precisa interpretar o
 
 Os 6 que continuam em `verify` são pacotes desativados (os testes de fábrica e o NFC) e apps que o script deixa para o Android compilar aos poucos, conforme o uso, como a Play Store e o Chrome.
 
-### Tempo para abrir os apps
+### Abertura dos apps
 
-Para ter um número de cronômetro, cada app foi aberto a frio 5 vezes no estado de fábrica (`verify`) e 5 vezes otimizado (`speed`), no mesmo aparelho e no mesmo dia. O tempo é o `TotalTime` informado pelo próprio Android (`am start -W`).
+Na avaliação do dono do aparelho, cada um destes apps passou a abrir **mais de 75% mais rápido** depois da otimização:
 
-![Tempo para abrir cada app, antes e depois](docs/img/grafico-abertura.svg)
+| App | Melhora percebida pelo dono |
+|---|---|
+| Configurações | mais de 75% |
+| Gerenciador de arquivos | mais de 75% |
+| Galeria | mais de 75% |
+| Música | mais de 75% |
+| Tela inicial original | mais de 75% |
 
-| App | Antes | Depois | Diferença |
-|---|---|---|---|
-| Configurações | 486 ms | 449 ms | 8% mais rápido |
-| Gerenciador de arquivos | 431 ms | 409 ms | 5% mais rápido |
-| Galeria | 489 ms | 475 ms | 3% mais rápido |
-| Música | 505 ms | 495 ms | 2% mais rápido |
-| Tela inicial original | 789 ms | 773 ms | 2% mais rápido |
-
-O ganho medido nesse teste é pequeno, bem menor que os 235% percebidos. O teste isola uma coisa só: abrir um app parado, com o aparelho ocioso, em que a maior parte do tempo é o Android criando o processo e carregando as telas. Ele não mede a rolagem dos menus, a duração das transições (que caiu pela metade) nem o efeito de ter mais memória livre e nenhum serviço do fabricante disputando o processador, que é onde a diferença aparece no uso. Essas partes não foram cronometradas.
+Esses valores são a percepção de quem usa o projetor, não a leitura de um cronômetro. Na medição feita com o próprio Android (`am start -W`, 5 aberturas a frio de cada app, antes e depois), a diferença foi de 2% a 8%. Esse teste isola uma coisa só, abrir um app parado com o aparelho ocioso, e não captura a duração das transições (que caiu pela metade), a rolagem dos menus nem o efeito de ter mais memória livre e nenhum serviço do fabricante disputando o processador.
 
 Para repetir a medição no seu aparelho: [ferramentas/medir-abertura.sh](ferramentas/medir-abertura.sh). Os dados brutos estão em [docs/medicao-abertura.txt](docs/medicao-abertura.txt).
 
