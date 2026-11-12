@@ -56,7 +56,8 @@ Os mesmos três testes da Allwinner do HY320 Mini, a pilha de impressão e mais 
 
 ## Particularidades deste firmware
 
-- **O protetor de tela recarrega a tela inicial antiga.** Depois de trocar para o Projectivy, o protetor de tela da HTC continuava ligado e, ao entrar, carregava a tela inicial original inteira (132 a 160 MB). O `otimizar-hy320.ps1` com `-InstalarProjectivy` desliga o protetor de tela quando ele pertence à tela inicial de fábrica, e o `restaurar-hy320.ps1` religa.
+- **O protetor de tela recarrega a tela inicial antiga.** Depois de trocar para o Projectivy, o protetor de tela da HTC continuava ligado e, ao entrar, carregava a tela inicial original inteira (132 a 160 MB). O `otimizar-hy320.ps1` com `-InstalarProjectivy` troca o protetor por `com.android.dreams.basic/.Colors` quando ele pertence à tela inicial de fábrica, e o `restaurar-hy320.ps1` volta o original.
+- **Não desligue o protetor de tela.** Com `screen_off_timeout=300000` e `sleep_timeout=-1`, o aparelho entra no protetor após 5 minutos sem usar o controle e fica nele. Com `screensaver_enabled=0`, ele "dorme" nesse momento, e aqui dormir é desligar: `sys.boot.reason=shutdown,`, 3 desligamentos em 30 minutos durante o teste, um deles no meio da compilação (que não conta como uso). Com o protetor "Cores", o mesmo teste ficou em `mWakefulness=Dreaming`, sem desligar.
 - **Pouco armazenamento.** Com 1,3 GB livres, compilar todos os apps em `speed` pode encher o `/data`. O script passa a usar `speed-profile` abaixo de 1,5 GB livres e para de compilar abaixo de 500 MB.
 - **Vídeo.** O decodificador de hardware toca VP9 em 1920x1080 a 60 fps (testado no YouTube para TV e no SmartTube) e recebe até 3840x2160. O decodificador AV1 (`allwinner.decoder.av1`) registra vários `UnsupportedIndex` no log.
 - **YouTube ReVanced/ReX limitado a 240p.** As versões modificadas do YouTube de celular (`app.rvx.android.youtube`, `app.rex.android.youtube`) só ofereciam 240p, usavam o decodificador AV1 e abriam sozinhas no boot (cerca de 94 MB). Não é limite do aparelho: o YouTube para TV e o SmartTube tocam 1080p60 na mesma rede.
@@ -70,6 +71,7 @@ Os mesmos três testes da Allwinner do HY320 Mini, a pilha de impressão e mais 
 | Projectivy logo após o boot | 306 MB durante a tela de boas-vindas (carregando ícones); medir de novo depois de concluí-la |
 | Loja + atualizador + OfficeSuite | 61 MB, que deixam de rodar |
 | Memória disponível (`MemAvailable`) | 410 MB antes; 363 MB depois de reiniciar, ainda na tela de boas-vindas do Projectivy |
-| Entradas compiladas antes | 6 em `speed`, 12 em `speed-profile`, 83 em `verify` |
+| Entradas compiladas | antes: 6 em `speed`, 12 em `speed-profile`, 83 em `verify`; depois do script: 81 em `speed`, 3 em `speed-profile`, 14 em `verify` |
+| Espaço livre em `/data` | 2,1 GB antes da compilação completa, 1,87 GB depois |
 
 A comparação de memória antes e depois não é conclusiva, pelo mesmo motivo do caso HY320 Mini: os apps abertos eram diferentes em cada medição.

@@ -109,8 +109,18 @@ $livreParaSpeedMB = 1500
 $livreMinimoMB = 500
 
 $projectivy = 'com.spocky.projengmenu'
+# Protetor de tela "Cores" do proprio Android: leve e nao depende de nenhuma tela inicial.
+$protetorBasico = 'com.android.dreams.basic/.Colors'
 
 function Sh([string]$cmd) { & adb -s $alvo shell $cmd }
+function Conectado { ((& adb -s $alvo get-state 2>$null) -join '').Trim() -eq 'device' }
+function PararSeDesconectou {
+  if (-not (Conectado)) {
+    Write-Host 'A conexao com o projetor caiu (desligou, entrou em espera ou saiu do Wi-Fi).' -ForegroundColor Red
+    Write-Host 'Nada se perde: ligue o projetor e rode de novo o mesmo comando; o que ja foi feito e pulado.' -ForegroundColor Red
+    exit 1
+  }
+}
 function Valor([string]$cmd) { ((Sh $cmd) -join '').Trim() }
 function DnsPrivadoValidou { ((Sh 'dumpsys connectivity') -join ' ') -match 'ValidatedPrivateDnsAddresses: \[[^\]]+\]' }
 function LivreMB {
@@ -200,6 +210,9 @@ if (-not (Test-Path $arquivoEstado)) {
     ntp_server                 = Valor 'settings get global ntp_server'
     bluetooth_on               = Valor 'settings get global bluetooth_on'
     screensaver_enabled        = Valor 'settings get secure screensaver_enabled'
+    screensaver_components     = Valor 'settings get secure screensaver_components'
+    # O log verboso de Wi-Fi nao fica em settings: o estado aparece no dumpsys ("Verbose logging is on/off").
+    wifi_verbose_logging       = if (((Sh 'dumpsys wifi') -join "`n") -match 'Verbose logging is (on|off)') { $Matches[1] } else { '' }
   }
   $original.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" } | Out-File -Encoding utf8 $arquivoEstado
   Write-Host "Valores originais gravados em $arquivoEstado"
@@ -298,13 +311,19 @@ if ($InstalarProjectivy) {
 
   # Em alguns firmwares (ex.: perfil htc) o protetor de tela pertence a tela inicial de fabrica:
   # quando ele liga, a tela antiga volta a ser carregada (130+ MB) mesmo com o Projectivy em uso.
+  # Troca pelo protetor basico do Android. NAO desligar o protetor: sem ele, o aparelho "dorme"
+  # no tempo de tela (5 min sem usar o controle) e, neste projetor, dormir e desligar.
   $protetor = Valor 'settings get secure screensaver_components'
   $pacoteTelaAntiga = ($telaAntes -split '/')[0]
   if ($perfil) { $pacoteTelaAntiga = ($perfil.TelaInicial -split '/')[0] }
   if ($pacoteTelaAntiga -and $pacoteTelaAntiga -ne $projectivy -and $protetor -like "$pacoteTelaAntiga/*") {
-    Sh 'settings put secure screensaver_enabled 0'
-    Sh "am force-stop $pacoteTelaAntiga"
-    Write-Host 'Protetor de tela desligado: ele fazia parte da tela inicial antiga e a recarregava na memoria'
+    if ($instalados -contains $protetorBasico.Split('/')[0]) {
+      Sh "settings put secure screensaver_components $protetorBasico"
+      Sh "am force-stop $pacoteTelaAntiga"
+      Write-Host "Protetor de tela trocado por $protetorBasico (o anterior recarregava a tela inicial antiga na memoria)"
+    } else {
+      Write-Host 'O protetor de tela pertence a tela inicial antiga e vai recarrega-la na memoria; mantido porque nao ha outro instalado.' -ForegroundColor Yellow
+    }
   }
 }
 
@@ -318,23 +337,29 @@ if (-not $PularCompilacao) {
   }
   $pacotes = @(Sh 'pm list packages -e') -replace 'package:', '' | Where-Object { $_ -and $naoCompilar -notcontains $_ } | Sort-Object
   $n = 0
+  $semEspaco = $false
   foreach ($pkg in $pacotes) {
     $n++
     if ($n % 10 -eq 0) {
       $livre = LivreMB
       if ($livre -ge 0 -and $livre -lt $livreMinimoMB) {
         Write-Host "Compilacao interrompida: so $livre MB livres. Libere espaco e rode de novo com o mesmo comando." -ForegroundColor Yellow
+        $semEspaco = $true
         break
       }
     }
-    $r = (Sh "cmd package compile -m $modo $pkg") -join ' '
+    $r = (Sh "cmd package compile -m $modo $pkg" 2>$null) -join ' '
+    if (-not $r) { PararSeDesconectou }
     Write-Host ("[{0}/{1}] {2}: {3}" -f $n, $pacotes.Count, $pkg, $r)
   }
-  # Apps que ja tem perfil de uso: recompila guiado pelo perfil.
-  foreach ($pkg in ($compilarPorPerfil | Where-Object { $instalados -contains $_ })) {
-    Write-Host ("{0}: {1}" -f $pkg, ((Sh "cmd package compile -m speed-profile $pkg") -join ' '))
+  # Apps que ja tem perfil de uso: recompila guiado pelo perfil (menos quando o espaco acabou).
+  foreach ($pkg in ($compilarPorPerfil | Where-Object { -not $semEspaco -and $instalados -contains $_ })) {
+    $r = (Sh "cmd package compile -m speed-profile $pkg" 2>$null) -join ' '
+    if (-not $r) { PararSeDesconectou }
+    Write-Host ("{0}: {1}" -f $pkg, $r)
   }
   Write-Host "Espaco livre depois da compilacao: $(LivreMB) MB"
 }
+PararSeDesconectou
 
 Write-Host 'Concluido. Reinicie o projetor e, depois, desligue a Depuracao USB nas opcoes do desenvolvedor.' -ForegroundColor Green

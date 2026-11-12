@@ -72,7 +72,7 @@ if (Test-Path $arquivoEstado) {
   $original = @{
     window_animation_scale = '1.0'; transition_animation_scale = '1.0'; animator_duration_scale = 'null'
     private_dns_mode = 'null'; private_dns_specifier = 'null'; ntp_server = 'null'
-    bluetooth_on = '1'; screensaver_enabled = ''
+    bluetooth_on = '1'; screensaver_enabled = ''; wifi_verbose_logging = 'on'
   }
 }
 
@@ -85,7 +85,8 @@ function Restaurar([string]$ns, [string]$chave) {
 Restaurar 'global' 'window_animation_scale'
 Restaurar 'global' 'transition_animation_scale'
 Restaurar 'global' 'animator_duration_scale'
-Sh 'cmd wifi set-verbose-logging enabled' | Out-Null
+# Log verboso de Wi-Fi: so religa se estava ligado (sem registro, fica como esta).
+if ($original['wifi_verbose_logging'] -eq 'on') { Sh 'cmd wifi set-verbose-logging enabled' | Out-Null }
 Restaurar 'global' 'bluetooth_on'
 Write-Host 'Ajustes de animacao, log de Wi-Fi e Bluetooth (vale no proximo boot) restaurados'
 
@@ -97,6 +98,7 @@ Restaurar 'global' 'private_dns_mode'
 Write-Host 'DNS privado e servidor de hora restaurados'
 
 Restaurar 'secure' 'screensaver_enabled'
+Restaurar 'secure' 'screensaver_components'
 
 # Volta a tela inicial que estava em uso antes da otimizacao.
 $tela = $original['tela_inicial']
@@ -112,12 +114,14 @@ if ($tela) {
   Write-Host 'Tela inicial de fabrica nao identificada neste firmware; a tela inicial atual foi mantida.' -ForegroundColor Yellow
 }
 if ($RemoverProjectivy) {
-  Write-Host ("Removendo Projectivy: {0}" -f ((Sh "pm uninstall $projectivy") -join ' '))
+  $r = (Sh "pm uninstall $projectivy") -join ' '
+  if (-not $Simular) { Write-Host "Removendo Projectivy: $r" }
 }
 
 if (Test-Path $arquivoDesativados) {
   foreach ($pkg in (Get-Content $arquivoDesativados | Where-Object { $_ } | Select-Object -Unique)) {
-    Write-Host ("Reativando {0}: {1}" -f $pkg, ((Sh "pm enable $pkg") -join ' '))
+    $r = (Sh "pm enable $pkg") -join ' '
+    if (-not $Simular) { Write-Host "Reativando ${pkg}: $r" }
   }
   if (-not $Simular) { Remove-Item $arquivoDesativados -Confirm:$false }
 }

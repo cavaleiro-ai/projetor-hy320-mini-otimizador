@@ -192,7 +192,7 @@ Estas têm uma contrapartida, por isso são opcionais. `-Completo` liga as quatr
 | `-BloquearAnuncios` | Bloqueia domínios de anúncio e rastreamento no sistema inteiro, pelo DNS privado do Android (AdGuard DNS) | Não remove anúncios dentro do YouTube. As consultas de DNS do projetor passam a ir para o AdGuard. Veja [Bloqueio de anúncios](#bloqueio-de-anúncios) |
 | `-DesativarFabricante` | Desativa a loja de apps do fabricante e os atualizadores automáticos | O projetor deixa de receber atualizações do fabricante. A Play Store continua funcionando |
 | `-DesligarBluetooth` | O Bluetooth passa a iniciar desligado | Para usar, ligue nas Configurações. O Android lembra o último estado: se reiniciar com ele ligado, volta ligado |
-| `-InstalarProjectivy` | Instala o [Projectivy Launcher](https://github.com/spocky/miproja1) como tela inicial, conferindo o SHA-256 publicado pelo GitHub antes de instalar. Se o protetor de tela fizer parte da tela inicial de fábrica, ele é desligado, porque recarregaria a tela antiga na memória | Mais organizado, porém pode usar mais memória que a tela original (87 MB contra 42 MB no HY320 Mini) |
+| `-InstalarProjectivy` | Instala o [Projectivy Launcher](https://github.com/spocky/miproja1) como tela inicial, conferindo o SHA-256 publicado pelo GitHub antes de instalar. Se o protetor de tela fizer parte da tela inicial de fábrica, ele é trocado pelo protetor "Cores" do próprio Android, porque recarregaria a tela antiga na memória. Ele não é desligado: sem protetor, o aparelho dorme após o tempo de tela e, nesses projetores, dormir é desligar | Mais organizado, porém pode usar mais memória que a tela original (87 MB contra 42 MB no HY320 Mini) |
 | `-Desativar pkg1,pkg2` | Desativa outros pacotes que você indicar | Por sua conta |
 | `-PularCompilacao` | Pula a compilação dos apps | Útil só para reaplicar ajustes |
 | `-Simular` | Confere o aparelho, mostra o firmware detectado, os pacotes que seriam desativados e o modo de compilação, sem alterar nada | Nenhuma |
@@ -202,7 +202,9 @@ Estas têm uma contrapartida, por isso são opcionais. `-Completo` liga as quatr
 ```text
 PS> .\otimizar-hy320.ps1 -Ip 192.168.0.15 -Completo
 Projetor confirmado: HY320mini (sun50iw12p1) em 192.168.0.15:5555
+Firmware: HY320mini_Android11_202506182038 (perfil 'chiptrip')
 Backup do estado original salvo em .\backup
+Valores originais gravados em .\backup\estado-original.txt
 Animacoes em 0.5x e log verboso de Wi-Fi desligado
 Bluetooth ficara desligado a partir do proximo reinicio
 Bloqueio de anuncios ativo (dns.adguard-dns.com). Teste: PING doubleclick.net (127.0.0.1) 56(84) bytes of data.
@@ -223,6 +225,7 @@ Projectivy definido como tela inicial (conclua a tela de boas-vindas no projetor
 [98/103] com.softwinner.tvvolume: Success
 [99/103] com.softwinner.vis: Success
 ...
+Espaco livre depois da compilacao: (MB livres em /data)
 Concluido. Reinicie o projetor e, depois, desligue a Depuracao USB nas opcoes do desenvolvedor.
 ```
 
